@@ -27,7 +27,27 @@ function main ()
 	echo -e " - SETTING UP NEW APT SOURCES\n\n\n"
 	sudo sed -i 's/jammy/noble/g' /etc/apt/sources.list
 	sudo sed -i.save 's/strigoi/nzambi/g' /etc/apt/sources.list
-	sudo apt-get update
+	{
+		sudo apt-get update
+	} || {
+		timer 10 "An error occured while updating package cache. Please make sure you have internet. We will try again shortly."
+		sudo apt-get update
+	} || {
+		timer 20 "An error occured while updating package cache. Please make sure you have internet. We will try again shortly."
+		sudo apt-get update
+	} || {
+		timer 30 "An error occured while updating package cache. Please make sure you have internet. We will try again shortly."
+		sudo apt-get update
+	} || {
+		timer 60 "An error occured while updating package cache. Please make sure you have internet. We will try again shortly."
+		sudo apt-get update
+	} || {
+		timer 10 "An error occured while updating package cache. 5 attempts have been made. Resetting system and giving up."
+		sudo sed -i 's/noble/jammy/g' /etc/apt/sources.list
+		sudo sed -i.save 's/nzambi/strigoi/g' /etc/apt/sources.list
+		sudo apt-get update
+		return 2
+	}
 
 	echo -e "\n\n\n - INITIATING UPGRADE\n\n\n"
 	{
