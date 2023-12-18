@@ -27,7 +27,7 @@ function main ()
 	echo -e " - SETTING UP NEW APT SOURCES\n\n\n"
 	sudo sed -i 's/jammy/noble/g' /etc/apt/sources.list
 	sudo sed -i.save 's/strigoi/nzambi/g' /etc/apt/sources.list
-	bad_line=$(grep -E "partner$" /etc/apt/sources.list | grep -v "^E")
+	bad_line=$(grep -E "partner$" /etc/apt/sources.list | grep -v "^#")
 	sudo sed -i "s;$bad_line;# $bad_line;" /etc/apt/sources.list
 	{
 		sudo apt-get update
