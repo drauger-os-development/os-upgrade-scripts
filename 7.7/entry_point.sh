@@ -55,6 +55,17 @@ function main ()
 	{
 		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
+		if [[ $(dpkg -l netcat-traditional | grep "^ii" | awk '{print $2}') == "netcat-traditional" ]]; then
+			sudo apt-get --force-yes -y purge netcat-traditional
+		fi
+	} || {
+		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
+		autopurge
+		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+	}
+	{
+		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+	} || {
 		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
 		autopurge
 		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
