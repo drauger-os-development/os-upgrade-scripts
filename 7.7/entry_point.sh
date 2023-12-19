@@ -133,7 +133,7 @@ function perform_usr_merge ()
 			return
 		fi
 		old_IFS="$IFS"
-		IFS="\n"
+		export IFS='\n'
 		while true; do
 			for each in $output; do
 				file_1=$(echo "$each" | awk '{print $1}')
@@ -167,7 +167,7 @@ function perform_usr_merge ()
 				break
 			fi
 		done
-		IFS="$old_IFS"
+		export IFS="$old_IFS"
 	}
 	set -Ee
 }
