@@ -138,8 +138,8 @@ function perform_usr_merge ()
 			for each in $output; do
 				file_1=$(echo "$each" | awk '{print $1}')
 				file_2=$(echo "$each" | awk '{print $2}')
-				md5_1=$(md5sum $file_1)
-				md5_2=$(md5sum $file_2)
+				md5_1=$(md5sum $file_1 | awk '{print $1}')
+				md5_2=$(md5sum $file_2 | awk '{print $1}')
 				if [[ "$md5_1" == "$md5_2" ]]; then
 					if [[ "/usr" == ${file_1::4} ]]; then
 						sudo rm -fv "$file_2"
