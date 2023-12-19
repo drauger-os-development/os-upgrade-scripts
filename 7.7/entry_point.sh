@@ -125,15 +125,16 @@ function perform_usr_merge ()
 
 	sudo apt-get update
 	{
-		sudo apt-get install usrmerge
+		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install usrmerge
 	} || {
 		output=$(sudo /usr/lib/usrmerge/convert-usrmerge 2>&1 | grep -E "^Both .* and .* exist.$" | sed -E 's/Both | and| exist.//g')
 		if [[ "$output" == "" ]]; then
+			set -Ee
 			return
 		fi
 		old_IFS="$IFS"
 		IFS="\n"
-		while True; do
+		while true; do
 			for each in $output; do
 				file_1=$(echo "$each" | awk '{print $1}')
 				file_2=$(echo "$each" | awk '{print $2}')
@@ -168,4 +169,5 @@ function perform_usr_merge ()
 		done
 		IFS="$old_IFS"
 	}
+	set -Ee
 }
