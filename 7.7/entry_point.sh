@@ -24,6 +24,7 @@
 function main ()
 {
 	### MAIN UPGRADE PROCEDURE ###
+	perform_usr_merge
 	echo -e " - SETTING UP NEW APT SOURCES\n\n\n"
 	sudo sed -i 's/jammy/noble/g' /etc/apt/sources.list
 	sudo sed -i.save 's/strigoi/nzambi/g' /etc/apt/sources.list
@@ -58,12 +59,6 @@ function main ()
 		if [[ $(dpkg -l netcat-traditional | grep "^ii" | awk '{print $2}') == "netcat-traditional" ]]; then
 			sudo apt-get --force-yes -y purge netcat-traditional
 		fi
-	} || {
-		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
-		autopurge
-		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
-	}
-	{
 		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
 		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
@@ -122,4 +117,55 @@ During the upgrade to the new version of Drauger OS, a few changes will be enfor
 
 If you installed Drauger OS for the first time with version 7.6, these changes do not apply to you. However, if you upgraded your system from Drauger OS 7.5.1, you may be among the small number of users who are affected by this change."
 	timer $((added_time+10)) "Please read the above disclosure(s)."
+}
+
+function perform_usr_merge ()
+{
+	set +Ee
+
+	sudo apt-get update
+	{
+		sudo apt-get install usrmerge
+	} || {
+		output=$(sudo /usr/lib/usrmerge/convert-usrmerge 2>&1 | grep -E "^Both .* and .* exist.$" | sed -E 's/Both | and| exist.//g')
+		if [[ "$output" == "" ]]; then
+			return
+		fi
+		old_IFS="$IFS"
+		IFS="\n"
+		while True; do
+			for each in $output; do
+				file_1=$(echo "$each" | awk '{print $1}')
+				file_2=$(echo "$each" | awk '{print $2}')
+				md5_1=$(md5sum $file_1)
+				md5_2=$(md5sum $file_2)
+				if [[ "$md5_1" == "$md5_2" ]]; then
+					if [[ "/usr" == ${file_1::4} ]]; then
+						sudo rm -fv "$file_2"
+					else
+						sudo rm -fv "$file_1"
+					fi
+				else
+					mod_time_1=$(stat --format=%Y "$file_1")
+					mod_time_2=$(stat --format=%Y "$file_2")
+					if [[ "$mod_time_1" -gt "$mod_time_2" ]]; then
+						sudo rm -fv "$file_2"
+					elif [[ "$mod_time_2" -gt "$mod_time_1" ]]; then
+						sudo rm -fv "$file_1"
+					else
+						if [[ "/usr" == ${file_1::4} ]]; then
+							sudo rm -fv "$file_2"
+						else
+							sudo rm -fv "$file_1"
+						fi
+					fi
+				fi
+			done
+			output=$(sudo /usr/lib/usrmerge/convert-usrmerge 2>&1 | grep -E "^Both .* and .* exist.$" | sed -E 's/Both | and| exist.//g')
+			if [[ "$output" == "" ]]; then
+				break
+			fi
+		done
+		IFS="$old_IFS"
+	}
 }
