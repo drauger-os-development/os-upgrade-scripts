@@ -171,3 +171,56 @@ function perform_usr_merge ()
 	}
 	set -Ee
 }
+
+function major_changes ()
+{
+	# Handle all major, but optional, changes here
+	echo -e "
+\t\t\t### DESKTOP ENVIRONMENT CHANGE OVER ###
+
+With the release of Drauger OS 7.7 Nzambi, the default desktop environment of Drauger OS is being changed from Xfce to KDE Plasma.
+
+Performance of a KDE Plasma system should be near identical to that if a Xfce system."
+	mem=$(lsmem -b | grep "Total online memory" | awk '{print $4}')
+	mem=$((mem/(1024*1024*1024)))
+	wait_time=10
+	if [[ "$mem" -le "2" ]]; then
+		echo -e "
+However, we have detected that your system has 2 GB or less of memory. We strongly suggest that you do not opt for this upgrade as KDE Plasma requires more memory than Xfce does. However, you still have the option to opt for this upgrade, if you so choose."
+		wait_time=$((wait_time+15))
+	fi
+	echo -e "
+Opting for this upgrade will also provide you with the ability to use Wayland, if you so choose.
+"
+	timer "$wait_time" "If you haven't already, please make sure you read the above statment."
+	confirmation
+	if [[ "$?" == "1" ]]; then
+		return
+	fi
+	sudo apt-get update
+	sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme plasma-workspace-wayland
+	return 0
+}
+
+function mandatory_changes ()
+{
+	# Handle all mandatory changes here
+	if [[ -f /usr/bin/pulseaudio ]]; then
+		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge pulseaudio
+		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install pipewire pipewire-pulse wireplumber libspa-0.2-modules libspa-0.2-bluetooth
+	fi
+	if [[ ! -f /usr/bin/systemd-boot-manager ]]; then
+		if [[ -d /boot/efi/EFI/systemd ]]; then
+			sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install systemd-boot-manager
+			root_part=$(lsblk --output path,mountpoint | grep "/$" | awk '{print $1}')
+			root_uuid=$(lsblk --output path,uuid "$root_part" | grep "^$root_part" | awk '{print $2}')
+			sudo systemd-boot-manager --key=uuid
+			echo "$root_uuid" | sudo tee /etc/systemd-boot-manager/UUID.conf
+			sudo systemd-boot-manager --default Drauger_OS.conf
+			sudo systemd-boot-manager --enable
+			sudo systemd-boot-manager --update
+
+		fi
+	fi
+	return 0
+}
