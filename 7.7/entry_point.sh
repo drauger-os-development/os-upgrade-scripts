@@ -2,24 +2,24 @@
 # -*- coding: utf-8 -*-
 #
 #  upgrade-drauger
-#  
+#
 #  Copyright 2023 Thomas Castleman <batcastle@draugeros.org>
-#  
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
-#  
+#
 #
 function main ()
 {
@@ -117,6 +117,10 @@ During the upgrade to the new version of Drauger OS, a few changes will be enfor
 
 If you installed Drauger OS for the first time with version 7.6, these changes do not apply to you. However, if you upgraded your system from Drauger OS 7.5.1, you may be among the small number of users who are affected by this change."
 	timer $((added_time+10)) "Please read the above disclosure(s)."
+	confirmation
+	if [[ "$?" == "1" ]]; then
+		exit 1
+	fi
 }
 
 function perform_usr_merge ()
@@ -198,7 +202,7 @@ Opting for this upgrade will also provide you with the ability to use Wayland, i
 		return
 	fi
 	sudo apt-get update
-	sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme plasma-workspace-wayland
+	sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme plasma-workspace-wayland libnvidia-egl-wayland1
 	return 0
 }
 
