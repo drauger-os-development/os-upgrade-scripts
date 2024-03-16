@@ -55,6 +55,7 @@ function main ()
 	}
 
 	echo -e "\n\n\n - INITIATING UPGRADE\n\n\n"
+	sudo groupadd polkitd
 	{
 		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
