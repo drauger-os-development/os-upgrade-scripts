@@ -3,7 +3,7 @@
 #
 #  upgrade-drauger
 #
-#  Copyright 2023 Thomas Castleman <batcastle@draugeros.org>
+#  Copyright 2024 Thomas Castleman <batcastle@draugeros.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,9 @@ function main ()
 	sudo sed -i 's/jammy/noble/g' /etc/apt/sources.list
 	sudo sed -i.save 's/strigoi/nzambi/g' /etc/apt/sources.list
 	bad_line=$(grep -E "partner$" /etc/apt/sources.list | grep -v "^#")
-	sudo sed -i "s;$bad_line;# $bad_line;" /etc/apt/sources.list
+	if [ "$bad_line" != "" ]; then
+		sudo sed -i "s;$bad_line;# $bad_line;" /etc/apt/sources.list
+	fi
 	{
 		sudo apt-get update
 	} || {
@@ -88,7 +90,7 @@ function disclosure ()
 		changes="
 
 $(BOLD)PIPEWIRE$(RESET)
-During the upgrade from Drauger OS 7.5.1, users had the option to upgrade from PulseAudio to Pipewire. Now, with the upgrade from Drauger OS 7.6, PulseAudio is no longer going to be supported. As such, all users will be required to upgrade to Pipewire if they wish to retain support for their OS.
+During the upgrade to Drauger OS 7.6, users had the option to upgrade from PulseAudio to Pipewire. Now, with the upgrade to Drauger OS 7.7, PulseAudio is no longer going to be supported. As such, all users will be required to upgrade to Pipewire if they wish to retain support for their OS.
 
 Pipewire is a next-generation audio interface for software. It spoofs PulseAudio, so all your PulseAudio apps will continue to work as they have before. It also offers lower audio latency, better Bluetooth support, and better audio integration with apps and games running in Wine or Proton."
 		added_time=$((added_time+10))
@@ -98,7 +100,7 @@ Pipewire is a next-generation audio interface for software. It spoofs PulseAudio
 			changes="$changes
 
 $(BOLD)SYSTEMD-BOOT-MANAGER$(RESET)
-During the upgrade from Drauger OS 7.5.1, users had the option to upgrade from a simple script to handle their bootloader, to the new systemd-boot-manager package. This change only applies to users using UEFI/EFI installations of Drauger OS. We detected you are using one of these installations, so this change may apply to you.
+During the upgrade to Drauger OS 7.6, users had the option to upgrade from a simple script to handle their bootloader, to the new systemd-boot-manager package. This change only applies to users using UEFI/EFI installations of Drauger OS. We detected you are using one of these installations, so this change may apply to you.
 
 Systemd-Boot-Manager allows easier control of your bootloader, is less error prone, and is capable of receiving updates, unlike the script which was originally being used."
 			added_time=$((added_time+10))
@@ -119,7 +121,7 @@ If you installed Drauger OS for the first time with version 7.6, these changes d
 	timer $((added_time+10)) "Please read the above disclosure(s)."
 	confirmation
 	if [[ "$?" == "1" ]]; then
-		exit 1
+		return 2
 	fi
 }
 
@@ -173,6 +175,7 @@ function perform_usr_merge ()
 		done
 		export IFS="$old_IFS"
 	}
+	sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge usrmerge
 	set -Ee
 }
 
@@ -202,7 +205,53 @@ Opting for this upgrade will also provide you with the ability to use Wayland, i
 		return
 	fi
 	sudo apt-get update
-	sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme plasma-workspace-wayland libnvidia-egl-wayland1
+	sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme drauger-settings-plasma plasma-workspace-wayland libnvidia-egl-wayland1
+	if [ -f /etc/lightdm/lightdm.conf ]; then
+		auto_login=$(grep "^autologin-user" /etc/lightdm/lightdm.conf | sed 's/=/ /g' | awk '{print $2}')
+	fi
+	mkdir -p /etc/sddm.conf.d
+	sudo touch /etc/sddm.conf.d/settings.conf
+	if [ "$auto_login" == "" ]; then
+		echo "[General]
+GreeterEnvironment=QT_SCREEN_SCALE_FACTORS=2,QT_FONT_DPI=192
+DisplayServer=wayland
+
+[Theme]
+Current=breeze
+CursorTheme=breeze-dark
+
+[Wayland]
+EnableHiDPI=true
+
+[X11]
+EnableHiDPI=true" | sudo tee /etc/sddm.conf.d/settings.conf
+	else
+		echo "[General]
+GreeterEnvironment=QT_SCREEN_SCALE_FACTORS=2,QT_FONT_DPI=192
+DisplayServer=wayland
+
+[Autologin]
+User=$auto_login
+Session=plasmawayland
+
+[Theme]
+Current=breeze
+CursorTheme=breeze-dark
+
+[Wayland]
+EnableHiDPI=true
+
+[X11]
+EnableHiDPI=true" | sudo tee /etc/sddm.conf.d/settings.conf
+	fi
+	sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge lightdm
+	read -p "
+Since you have opted to switch to KDE Plasma, would you like to remove Xfce? [Y/n]: " ans
+	if [ "${ans,,}" == "yes" ] || [ "${ans,,}" == "y" ]; then
+		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge xfce4-*
+	fi
+	sudo rm -v /etc/systemd/system/display-manager.service
+	sudo ln -sv /lib/systemd/system/sddm.service /etc/systemd/system/display-manager.service
 	return 0
 }
 
@@ -220,6 +269,7 @@ function mandatory_changes ()
 			root_uuid=$(lsblk --output path,uuid "$root_part" | grep "^$root_part" | awk '{print $2}')
 			sudo systemd-boot-manager --key=uuid
 			echo "$root_uuid" | sudo tee /etc/systemd-boot-manager/UUID.conf
+			echo "$root_part" | sudo tee /etc/systemd-boot-manager/root_device.conf
 			sudo systemd-boot-manager --default Drauger_OS.conf
 			sudo systemd-boot-manager --enable
 			sudo systemd-boot-manager --update
