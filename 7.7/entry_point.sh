@@ -80,7 +80,7 @@ function main ()
 	# Confirm user is using systemd-boot-manager if on EFI, enforce change over if not
 
 	autopurge
-	sudo apt-get clean
+	rm -v /home/$(whoami)/.drauger-tut
 }
 
 function disclosure ()
@@ -205,7 +205,6 @@ Opting for this upgrade will also provide you with the ability to use Wayland, i
 	if [[ "$?" == "1" ]]; then
 		return
 	fi
-	sudo apt-get update
 	sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme drauger-settings-plasma plasma-workspace-wayland libnvidia-egl-wayland1
 	if [ -f /etc/lightdm/lightdm.conf ]; then
 		auto_login=$(grep "^autologin-user" /etc/lightdm/lightdm.conf | sed 's/=/ /g' | awk '{print $2}')
