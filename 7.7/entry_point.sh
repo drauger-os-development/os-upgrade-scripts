@@ -24,7 +24,6 @@
 function main ()
 {
 	### MAIN UPGRADE PROCEDURE ###
-	export DEBIAN_FRONTEND="noninteractive"
 	perform_usr_merge
 	echo -e " - SETTING UP NEW APT SOURCES\n\n\n"
 	root sed -i 's/jammy/noble/g' /etc/apt/sources.list
@@ -58,16 +57,16 @@ function main ()
 	echo -e "\n\n\n - INITIATING UPGRADE\n\n\n"
 	root groupadd polkitd
 	{
-		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
 		if [[ $(dpkg -l netcat-traditional | grep "^ii" | awk '{print $2}') == "netcat-traditional" ]]; then
 			root apt-get --force-yes -y purge netcat-traditional
 		fi
-		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
 		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
 		autopurge
-		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+		DEBIAN_FRONTEND="noninteractive"root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	}
 
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
