@@ -30,7 +30,7 @@ function main ()
 	root sed -i.save 's/strigoi/nzambi/g' /etc/apt/sources.list
 	bad_line=$(grep -E "partner$" /etc/apt/sources.list | grep -v "^#")
 	if [ "$bad_line" != "" ]; then
-		root sed -i "s;$bad_line;# $bad_line;" /etc/apt/sources.list
+		sudo sed -i "s;$bad_line;# $bad_line;" /etc/apt/sources.list
 	fi
 	{
 		root apt-get update
