@@ -209,7 +209,7 @@ Opting for this upgrade will also provide you with the ability to use Wayland, i
 	if [ -f /etc/lightdm/lightdm.conf ]; then
 		auto_login=$(grep "^autologin-user" /etc/lightdm/lightdm.conf | sed 's/=/ /g' | awk '{print $2}')
 	fi
-	mkdir -p /etc/sddm.conf.d
+	sudo mkdir -p /etc/sddm.conf.d
 	sudo touch /etc/sddm.conf.d/settings.conf
 	if [ "$auto_login" == "" ]; then
 		echo "[General]
