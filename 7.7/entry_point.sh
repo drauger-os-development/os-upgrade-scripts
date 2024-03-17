@@ -24,6 +24,7 @@
 function main ()
 {
 	### MAIN UPGRADE PROCEDURE ###
+	export DEBIAN_FRONTEND="noninteractive"
 	perform_usr_merge
 	echo -e " - SETTING UP NEW APT SOURCES\n\n\n"
 	root sed -i 's/jammy/noble/g' /etc/apt/sources.list
