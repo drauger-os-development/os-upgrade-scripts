@@ -66,7 +66,7 @@ function main ()
 	} || {
 		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
 		autopurge
-		DEBIAN_FRONTEND="noninteractive"root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	}
 
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
