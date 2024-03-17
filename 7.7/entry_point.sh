@@ -26,47 +26,47 @@ function main ()
 	### MAIN UPGRADE PROCEDURE ###
 	perform_usr_merge
 	echo -e " - SETTING UP NEW APT SOURCES\n\n\n"
-	sudo sed -i 's/jammy/noble/g' /etc/apt/sources.list
-	sudo sed -i.save 's/strigoi/nzambi/g' /etc/apt/sources.list
+	root sed -i 's/jammy/noble/g' /etc/apt/sources.list
+	root sed -i.save 's/strigoi/nzambi/g' /etc/apt/sources.list
 	bad_line=$(grep -E "partner$" /etc/apt/sources.list | grep -v "^#")
 	if [ "$bad_line" != "" ]; then
-		sudo sed -i "s;$bad_line;# $bad_line;" /etc/apt/sources.list
+		root sed -i "s;$bad_line;# $bad_line;" /etc/apt/sources.list
 	fi
 	{
-		sudo apt-get update
+		root apt-get update
 	} || {
 		timer 10 "An error occured while updating package cache. Please make sure you have internet. We will try again shortly."
-		sudo apt-get update
+		root apt-get update
 	} || {
 		timer 20 "An error occured while updating package cache. Please make sure you have internet. We will try again shortly."
-		sudo apt-get update
+		root apt-get update
 	} || {
 		timer 30 "An error occured while updating package cache. Please make sure you have internet. We will try again shortly."
-		sudo apt-get update
+		root apt-get update
 	} || {
 		timer 60 "An error occured while updating package cache. Please make sure you have internet. We will try again shortly."
-		sudo apt-get update
+		root apt-get update
 	} || {
 		timer 10 "An error occured while updating package cache. 5 attempts have been made. Resetting system and giving up."
-		sudo sed -i 's/noble/jammy/g' /etc/apt/sources.list
-		sudo sed -i.save 's/nzambi/strigoi/g' /etc/apt/sources.list
-		sudo apt-get update
+		root sed -i 's/noble/jammy/g' /etc/apt/sources.list
+		root sed -i.save 's/nzambi/strigoi/g' /etc/apt/sources.list
+		root apt-get update
 		return 2
 	}
 
 	echo -e "\n\n\n - INITIATING UPGRADE\n\n\n"
-	sudo groupadd polkitd
+	root groupadd polkitd
 	{
-		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
 		if [[ $(dpkg -l netcat-traditional | grep "^ii" | awk '{print $2}') == "netcat-traditional" ]]; then
-			sudo apt-get --force-yes -y purge netcat-traditional
+			root apt-get --force-yes -y purge netcat-traditional
 		fi
-		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
-		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
+		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
 		autopurge
-		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	}
 
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
@@ -130,11 +130,11 @@ function perform_usr_merge ()
 {
 	set +Ee
 
-	sudo apt-get update
+	root apt-get update
 	{
-		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install usrmerge
+		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install usrmerge
 	} || {
-		output=$(sudo /usr/lib/usrmerge/convert-usrmerge 2>&1 | grep -E "^Both .* and .* exist.$" | sed -E 's/Both | and| exist.//g')
+		output=$(root /usr/lib/usrmerge/convert-usrmerge 2>&1 | grep -E "^Both .* and .* exist.$" | sed -E 's/Both | and| exist.//g')
 		if [[ "$output" == "" ]]; then
 			set -Ee
 			return
@@ -149,34 +149,34 @@ function perform_usr_merge ()
 				md5_2=$(md5sum $file_2 | awk '{print $1}')
 				if [[ "$md5_1" == "$md5_2" ]]; then
 					if [[ "/usr" == ${file_1::4} ]]; then
-						sudo rm -fv "$file_2"
+						root rm -fv "$file_2"
 					else
-						sudo rm -fv "$file_1"
+						root rm -fv "$file_1"
 					fi
 				else
 					mod_time_1=$(stat --format=%Y "$file_1")
 					mod_time_2=$(stat --format=%Y "$file_2")
 					if [[ "$mod_time_1" -gt "$mod_time_2" ]]; then
-						sudo rm -fv "$file_2"
+						root rm -fv "$file_2"
 					elif [[ "$mod_time_2" -gt "$mod_time_1" ]]; then
-						sudo rm -fv "$file_1"
+						root rm -fv "$file_1"
 					else
 						if [[ "/usr" == ${file_1::4} ]]; then
-							sudo rm -fv "$file_2"
+							root rm -fv "$file_2"
 						else
-							sudo rm -fv "$file_1"
+							root rm -fv "$file_1"
 						fi
 					fi
 				fi
 			done
-			output=$(sudo /usr/lib/usrmerge/convert-usrmerge 2>&1 | grep -E "^Both .* and .* exist.$" | sed -E 's/Both | and| exist.//g')
+			output=$(root /usr/lib/usrmerge/convert-usrmerge 2>&1 | grep -E "^Both .* and .* exist.$" | sed -E 's/Both | and| exist.//g')
 			if [[ "$output" == "" ]]; then
 				break
 			fi
 		done
 		export IFS="$old_IFS"
 	}
-	sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge usrmerge
+	root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge usrmerge
 	set -Ee
 }
 
@@ -205,12 +205,12 @@ Opting for this upgrade will also provide you with the ability to use Wayland, i
 	if [[ "$?" == "1" ]]; then
 		return
 	fi
-	sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme drauger-settings-plasma plasma-workspace-wayland libnvidia-egl-wayland1
+	root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme drauger-settings-plasma plasma-workspace-wayland libnvidia-egl-wayland1
 	if [ -f /etc/lightdm/lightdm.conf ]; then
 		auto_login=$(grep "^autologin-user" /etc/lightdm/lightdm.conf | sed 's/=/ /g' | awk '{print $2}')
 	fi
-	sudo mkdir -p /etc/sddm.conf.d
-	sudo touch /etc/sddm.conf.d/settings.conf
+	root mkdir -p /etc/sddm.conf.d
+	root touch /etc/sddm.conf.d/settings.conf
 	if [ "$auto_login" == "" ]; then
 		echo "[General]
 GreeterEnvironment=QT_SCREEN_SCALE_FACTORS=2,QT_FONT_DPI=192
@@ -224,7 +224,7 @@ CursorTheme=breeze-dark
 EnableHiDPI=true
 
 [X11]
-EnableHiDPI=true" | sudo tee /etc/sddm.conf.d/settings.conf
+EnableHiDPI=true" | root tee /etc/sddm.conf.d/settings.conf
 	else
 		echo "[General]
 GreeterEnvironment=QT_SCREEN_SCALE_FACTORS=2,QT_FONT_DPI=192
@@ -242,16 +242,16 @@ CursorTheme=breeze-dark
 EnableHiDPI=true
 
 [X11]
-EnableHiDPI=true" | sudo tee /etc/sddm.conf.d/settings.conf
+EnableHiDPI=true" | root tee /etc/sddm.conf.d/settings.conf
 	fi
-	sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge lightdm
+	root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge lightdm
 	read -p "
 Since you have opted to switch to KDE Plasma, would you like to remove Xfce? [Y/n]: " ans
 	if [ "${ans,,}" == "yes" ] || [ "${ans,,}" == "y" ]; then
-		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge xfce4-*
+		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge xfce4-*
 	fi
-	sudo rm -v /etc/systemd/system/display-manager.service
-	sudo ln -sv /lib/systemd/system/sddm.service /etc/systemd/system/display-manager.service
+	root rm -v /etc/systemd/system/display-manager.service
+	root ln -sv /lib/systemd/system/sddm.service /etc/systemd/system/display-manager.service
 	return 0
 }
 
@@ -259,20 +259,20 @@ function mandatory_changes ()
 {
 	# Handle all mandatory changes here
 	if [[ -f /usr/bin/pulseaudio ]]; then
-		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge pulseaudio
-		sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install pipewire pipewire-pulse wireplumber libspa-0.2-modules libspa-0.2-bluetooth
+		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge pulseaudio
+		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install pipewire pipewire-pulse wireplumber libspa-0.2-modules libspa-0.2-bluetooth
 	fi
 	if [[ ! -f /usr/bin/systemd-boot-manager ]]; then
 		if [[ -d /boot/efi/EFI/systemd ]]; then
-			sudo apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install systemd-boot-manager
+			root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install systemd-boot-manager
 			root_part=$(lsblk --output path,mountpoint | grep "/$" | awk '{print $1}')
 			root_uuid=$(lsblk --output path,uuid "$root_part" | grep "^$root_part" | awk '{print $2}')
-			sudo systemd-boot-manager --key=uuid
-			echo "$root_uuid" | sudo tee /etc/systemd-boot-manager/UUID.conf
-			echo "$root_part" | sudo tee /etc/systemd-boot-manager/root_device.conf
-			sudo systemd-boot-manager --default Drauger_OS.conf
-			sudo systemd-boot-manager --enable
-			sudo systemd-boot-manager --update
+			root systemd-boot-manager --key=uuid
+			echo "$root_uuid" | root tee /etc/systemd-boot-manager/UUID.conf
+			echo "$root_part" | root tee /etc/systemd-boot-manager/root_device.conf
+			root systemd-boot-manager --default Drauger_OS.conf
+			root systemd-boot-manager --enable
+			root systemd-boot-manager --update
 
 		fi
 	fi
