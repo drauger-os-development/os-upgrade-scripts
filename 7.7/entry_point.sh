@@ -205,7 +205,7 @@ Opting for this upgrade will also provide you with the ability to use Wayland, i
 	if [[ "$?" == "1" ]]; then
 		return
 	fi
-	root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme drauger-settings-plasma plasma-workspace-wayland libnvidia-egl-wayland1
+	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme drauger-settings-plasma plasma-workspace-wayland libnvidia-egl-wayland1
 	if [ -f /etc/lightdm/lightdm.conf ]; then
 		auto_login=$(grep "^autologin-user" /etc/lightdm/lightdm.conf | sed 's/=/ /g' | awk '{print $2}')
 	fi
@@ -244,7 +244,7 @@ EnableHiDPI=true
 [X11]
 EnableHiDPI=true" | root tee /etc/sddm.conf.d/settings.conf
 	fi
-	root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge lightdm
+	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge lightdm
 	read -p "
 Since you have opted to switch to KDE Plasma, would you like to remove Xfce? [Y/n]: " ans
 	if [ "${ans,,}" == "yes" ] || [ "${ans,,}" == "y" ]; then
@@ -259,8 +259,8 @@ function mandatory_changes ()
 {
 	# Handle all mandatory changes here
 	if [[ -f /usr/bin/pulseaudio ]]; then
-		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge pulseaudio
-		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install pipewire pipewire-pulse wireplumber libspa-0.2-modules libspa-0.2-bluetooth
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge pulseaudio
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install pipewire pipewire-pulse wireplumber libspa-0.2-modules libspa-0.2-bluetooth
 	fi
 	if [[ ! -f /usr/bin/systemd-boot-manager ]]; then
 		if [[ -d /boot/efi/EFI/systemd ]]; then
