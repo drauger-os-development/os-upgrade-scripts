@@ -64,9 +64,16 @@ function main ()
 		fi
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
+		if [[ -f /usr/bin/systemd-boot-manager ]]; then
+			DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y systemd-boot
+		fi
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+	} || {
 		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
 		autopurge
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+	} || {
+		DEBIAN_FRONTEND="noninteractive" root dpkg --configure -a --force-confold
 	}
 
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
@@ -205,7 +212,7 @@ Opting for this upgrade will also provide you with the ability to use Wayland, i
 	if [[ "$?" == "1" ]]; then
 		return
 	fi
-	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme drauger-settings-plasma plasma-workspace-wayland libnvidia-egl-wayland1
+	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme drauger-settings-plasma plasma-workspace-wayland libnvidia-egl-wayland1 sddm-theme-breeze
 	if [ -f /etc/lightdm/lightdm.conf ]; then
 		auto_login=$(grep "^autologin-user" /etc/lightdm/lightdm.conf | sed 's/=/ /g' | awk '{print $2}')
 	fi
@@ -264,7 +271,7 @@ function mandatory_changes ()
 	fi
 	if [[ ! -f /usr/bin/systemd-boot-manager ]]; then
 		if [[ -d /boot/efi/EFI/systemd ]]; then
-			root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install systemd-boot-manager
+			root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install systemd-boot-manager
 			root_part=$(lsblk --output path,mountpoint | grep "/$" | awk '{print $1}')
 			root_uuid=$(lsblk --output path,uuid "$root_part" | grep "^$root_part" | awk '{print $2}')
 			root systemd-boot-manager --key=uuid
