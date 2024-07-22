@@ -75,19 +75,23 @@ function main ()
 	} || {
 		DEBIAN_FRONTEND="noninteractive" root dpkg --configure -a --force-confold
 	}
-
+	root apt-get update
+	root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y upgrade
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
 	yes_array=("yes Yes YES y Y")
 	no_array=("no No NO n N")
 
-	# KDE Changeover
-	# Wayland Changeover
-
-	# Confirm user is using Pipewire, enforce change over if not
-	# Confirm user is using systemd-boot-manager if on EFI, enforce change over if not
-
 	autopurge
 	rm -v /home/$(whoami)/.drauger-tut
+}
+
+function configure ()
+{
+	echo -e "\n\n\nCONFIGURING KDE PLASMA\n\n\n"
+	gzip -dkv config.tar.gz
+	tar -xvf config.tar
+	cp -Rfv --preserve=all config/* /home/$(whoami)/.config/
+	echo -e "\n\n\nKDE PLASMA CONFIGURED\n\n\n"
 }
 
 function disclosure ()
@@ -216,6 +220,7 @@ Opting for this upgrade will also provide you with the ability to use Wayland, i
 	if [ -f /etc/lightdm/lightdm.conf ]; then
 		auto_login=$(grep "^autologin-user" /etc/lightdm/lightdm.conf | sed 's/=/ /g' | awk '{print $2}')
 	fi
+	configure
 	root mkdir -p /etc/sddm.conf.d
 	root touch /etc/sddm.conf.d/settings.conf
 	if [ "$auto_login" == "" ]; then
