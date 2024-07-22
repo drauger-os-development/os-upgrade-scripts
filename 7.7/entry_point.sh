@@ -75,8 +75,6 @@ function main ()
 	} || {
 		DEBIAN_FRONTEND="noninteractive" root dpkg --configure -a --force-confold
 	}
-	root apt-get update
-	root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y upgrade
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
 	yes_array=("yes Yes YES y Y")
 	no_array=("no No NO n N")
