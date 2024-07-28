@@ -28,7 +28,13 @@ function main ()
 	echo -e " - SETTING UP NEW APT SOURCES\n\n\n"
 	root sed -i 's/jammy/noble/g' /etc/apt/sources.list
 	root sed -i.save 's/strigoi/nzambi/g' /etc/apt/sources.list
-	bad_line=$(grep -E "partner$" /etc/apt/sources.list | grep -v "^#")
+	{
+		bad_line=$(grep -E "partner$" /etc/apt/sources.list | grep -v "^#")
+	} || {
+		# this try/catch block is needed because set -eE is enabled. Without it, this script fails if the user
+		# happens to not have the partner repos enabled.
+		bad_line=""
+	}
 	if [ "$bad_line" != "" ]; then
 		sudo sed -i "s;$bad_line;# $bad_line;" /etc/apt/sources.list
 	fi
