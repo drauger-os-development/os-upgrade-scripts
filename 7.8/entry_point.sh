@@ -61,7 +61,11 @@ function main ()
 	}
 
 	echo -e "\n\n\n - INITIATING UPGRADE\n\n\n"
-	root groupadd polkitd
+	{
+		root groupadd polkitd
+	} || {
+		:
+	}
 	{
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
