@@ -1,9 +1,9 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
 #
-#  upgrade-drauger
+#  entry_point.sh
 #
-#  Copyright 2025 Thomas Castleman <batcastle@draugeros.org>
+#  Copyright 2026 Thomas Castleman <batcastle@draugeros.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -61,7 +61,8 @@ function main ()
 	}
 
 	echo -e "\n\n\n - INITIATING UPGRADE\n\n\n"
-	if $(cat /etc/group | grep -vq 'polkitd'); then
+	file_contents=$(cat /etc/group)
+	if $(echo $file_contents | grep -vq 'polkitd'); then
 		root groupadd polkitd
 	fi
 	{
