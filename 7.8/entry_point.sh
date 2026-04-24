@@ -65,6 +65,7 @@ function main ()
 	if $(echo $file_contents | grep -vq 'polkitd'); then
 		root groupadd polkitd
 	fi
+	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install apt
 	{
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
