@@ -79,7 +79,9 @@ function main ()
 	no_array=("no No NO n N")
 
 	autopurge
-	rm -v /home/$(whoami)/.drauger-tut
+	if [[ -f /home/$(whoami)/.drauger-tut ]]; then
+		rm -v /home/$(whoami)/.drauger-tut
+	fi
 }
 
 function configure ()
