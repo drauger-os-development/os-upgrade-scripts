@@ -73,6 +73,9 @@ function main ()
 		autopurge
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y upgrade
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+	} || {
 		DEBIAN_FRONTEND="noninteractive" root dpkg --configure -a --force-confold
 	}
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
