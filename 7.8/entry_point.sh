@@ -95,6 +95,8 @@ function main ()
 	fi
 	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install apt drauger-settings-plasma
 	{
+		# Phased upgrade
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install linux-drauger libc6 bash systemd systemd-boot pipewire pipewire-pulse
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
 		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
