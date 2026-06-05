@@ -97,10 +97,10 @@ function main ()
 	{
 		# Phased upgrade
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install drauger-settings-plasma plasma-workspace
-		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install linux-drauger libc6 bash systemd systemd-boot pipewire pipewire-pulse
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install libc6 bash systemd systemd-boot pipewire pipewire-pulse
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
-		root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
 		autopurge
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
