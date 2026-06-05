@@ -93,7 +93,7 @@ function main ()
 	if $(echo $file_contents | grep -vq 'polkitd'); then
 		root groupadd polkitd
 	fi
-	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install apt drauger-settings-plasma
+	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install apt drauger-settings-plasma plasma-workspace
 	{
 		# Phased upgrade
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install linux-drauger libc6 bash systemd systemd-boot pipewire pipewire-pulse
