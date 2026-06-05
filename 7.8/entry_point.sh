@@ -25,6 +25,34 @@ function main ()
 {
 	### MAIN UPGRADE PROCEDURE ###
 	perform_usr_merge
+
+	echo -e "\n\n\n - INITIATING UPGRADE\n\n\n"
+	file_contents=$(cat /etc/group)
+	if $(echo $file_contents | grep -vq 'polkitd'); then
+		root groupadd polkitd
+	fi
+	root do-release-upgrade --env=DEBIAN_FRONTEND="noninteractive"
+	root sed -i.save 's/urgal/nzambi/g' /etc/apt/sources.list
+	{
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y upgrade
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+	} || {
+		DEBIAN_FRONTEND="noninteractive" root dpkg --configure -a --force-confold
+	}
+	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
+	yes_array=("yes Yes YES y Y")
+	no_array=("no No NO n N")
+
+	autopurge
+	if [[ -f /home/$(whoami)/.drauger-tut ]]; then
+		rm -v /home/$(whoami)/.drauger-tut
+	fi
+}
+
+function old_main ()
+{
+	### MAIN UPGRADE PROCEDURE ###
+	perform_usr_merge
 	echo -e " - SETTING UP NEW APT SOURCES\n\n\n"
 	root sed -i 's/noble/resolute/g' /etc/apt/sources.list
 	root sed -i.save 's/nzambi/urgal/g' /etc/apt/sources.list
