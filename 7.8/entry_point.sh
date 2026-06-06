@@ -110,7 +110,6 @@ function main ()
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
-		autopurge
 		if [ "$(dpkg -l plasma-workspace-wayland)" == "dpkg-query: no packages found matching plasma-workspace-wayland" ]; then
 			DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge plasma-workspace-wayland
 		fi
@@ -122,11 +121,24 @@ function main ()
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install k3b-i18n libkimageannotator-common
 	}
 	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install ufw
+	if $(dpkg -l | grep -q "^ii  rust-coreutils "); then
+		{
+			cmd_chroot apt-get purge --assume-yes --allow-remove-essential -y -o Dpkg::Options::="--force-confold" --allow-unauthenticated rust-coreutils coreutils-from-uutils
+		} || {
+			cmd_chroot apt-get purge --assume-yes --allow-remove-essential -y -o Dpkg::Options::="--force-confold" --allow-unauthenticated rust-coreutils
+		}
+	fi
+	if $(dpkg -l | grep -qv "^ii coreutils "); then
+		{
+			cmd_chroot apt-get install -o Dpkg::Options::="--force-confold" --assume-yes -y coreutils-from-gnu gnu-coreutils
+		} || {
+			cmd_chroot apt-get install -o Dpkg::Options::="--force-confold" --assume-yes -y coreutils
+		}
+	fi
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
 	yes_array=("yes Yes YES y Y")
 	no_array=("no No NO n N")
 
-	autopurge
 	if [[ -f /home/$(whoami)/.drauger-tut ]]; then
 		rm -v /home/$(whoami)/.drauger-tut
 	fi
