@@ -93,7 +93,16 @@ function main ()
 	if $(echo $file_contents | grep -vq 'polkitd'); then
 		root groupadd polkitd
 	fi
-	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install apt
+	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install apt drauger-sources
+	# New sources format
+	if [ -f /etc/apt/sources.list ]; then
+		if [ -f /etc/apt/sources.list.save ]; then
+			root rm -fv /etc/apt/sources.list.save
+		fi
+		root cp -v /etc/apt/sources.list /etc/apt/sources.list.save
+		root rm -fv /etc/apt/sources.list
+	fi
+	DEBIAN_FRONTEND="noninteractive" root apt-get update
 	{
 		# Phased upgrade
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install drauger-settings-plasma plasma-workspace
