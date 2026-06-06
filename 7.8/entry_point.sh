@@ -263,7 +263,7 @@ function mandatory_changes ()
 	wait_time=10
 	if [[ ! -f /usr/bin/startplasma-wayland ]]; then
 		if [[ "$mem" -gt "2" ]]; then
-			DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme drauger-settings-plasma plasma-workspace-wayland libnvidia-egl-wayland1 sddm-theme-breeze
+			DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y --install-recommends install plasma-desktop sddm drauger-plasma-theme drauger-settings-plasma plasma-workspace libnvidia-egl-wayland1 sddm-theme-breeze
 			if [ -f /etc/lightdm/lightdm.conf ]; then
 				auto_login=$(grep "^autologin-user" /etc/lightdm/lightdm.conf | sed 's/=/ /g' | awk '{print $2}')
 			fi
