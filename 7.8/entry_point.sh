@@ -106,8 +106,11 @@ function main ()
 	{
 		# Phased upgrade
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install drauger-settings-plasma plasma-workspace
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install libc6 bash systemd systemd-boot pipewire pipewire-pulse
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
 	} || {
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
 		if [ "$(dpkg -l plasma-workspace-wayland)" == "dpkg-query: no packages found matching plasma-workspace-wayland" ]; then
