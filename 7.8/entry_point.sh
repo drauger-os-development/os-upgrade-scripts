@@ -111,13 +111,17 @@ function main ()
 	} || {
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install --fix-broken
 		autopurge
-		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
-	} || {
-		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y upgrade
+		if [ "$(dpkg -l plasma-workspace-wayland)" == "dpkg-query: no packages found matching plasma-workspace-wayland" ]; then
+			DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y purge plasma-workspace-wayland
+		fi
 		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	} || {
 		DEBIAN_FRONTEND="noninteractive" root dpkg --configure -a --force-confold
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y upgrade
+	} || {
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install k3b-i18n libkimageannotator-common
 	}
+	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install ufw
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
 	yes_array=("yes Yes YES y Y")
 	no_array=("no No NO n N")
