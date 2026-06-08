@@ -128,16 +128,16 @@ function main ()
 	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y dist-upgrade
 	if $(dpkg -l | grep -q "^ii  rust-coreutils "); then
 		{
-			cmd_chroot apt-get purge --assume-yes --allow-remove-essential -y -o Dpkg::Options::="--force-confold" --allow-unauthenticated rust-coreutils coreutils-from-uutils
+			root apt-get purge --assume-yes --allow-remove-essential -y -o Dpkg::Options::="--force-confold" --allow-unauthenticated rust-coreutils coreutils-from-uutils
 		} || {
-			cmd_chroot apt-get purge --assume-yes --allow-remove-essential -y -o Dpkg::Options::="--force-confold" --allow-unauthenticated rust-coreutils
+			root apt-get purge --assume-yes --allow-remove-essential -y -o Dpkg::Options::="--force-confold" --allow-unauthenticated rust-coreutils
 		}
 	fi
 	if $(dpkg -l | grep -qv "^ii coreutils "); then
 		{
-			cmd_chroot apt-get install -o Dpkg::Options::="--force-confold" --assume-yes -y coreutils-from-gnu gnu-coreutils
+			root apt-get install -o Dpkg::Options::="--force-confold" --assume-yes -y coreutils-from-gnu gnu-coreutils
 		} || {
-			cmd_chroot apt-get install -o Dpkg::Options::="--force-confold" --assume-yes -y coreutils
+			root apt-get install -o Dpkg::Options::="--force-confold" --assume-yes -y coreutils
 		}
 	fi
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
