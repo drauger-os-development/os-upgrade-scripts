@@ -66,6 +66,14 @@ function main ()
 	if [ "$bad_line" != "" ]; then
 		sudo sed -i "s;$bad_line;# $bad_line;" /etc/apt/sources.list
 	fi
+	konsole_installed=0
+	if [ -f /usr/bin/konsole ]; then
+		konsole_installed=1
+	fi
+	dolphin_installed=0
+	if [ -f /usr/bin/dolphin ]; then
+		dolphin_installed=1
+	fi
 	{
 		root apt-get update
 	} || {
@@ -139,6 +147,17 @@ function main ()
 		} || {
 			root apt-get install -o Dpkg::Options::="--force-confold" --assume-yes -y coreutils
 		}
+	fi
+	# Check if Dolphin or Konsole got removed
+	if [ ! -f /usr/bin/konsole ]; then
+		if [ $konsole_installed == 1 ]; then
+			root apt-get install -o Dpkg::Options::="--force-confold" --assume-yes -y konsole
+		fi
+	fi
+	if [ ! -f /usr/bin/dolphin ]; then
+		if [ $dolphin_installed == 1 ]; then
+			root apt-get install -o Dpkg::Options::="--force-confold" --assume-yes -y dolphin
+		fi
 	fi
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
 	yes_array=("yes Yes YES y Y")
