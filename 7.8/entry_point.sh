@@ -74,6 +74,10 @@ function main ()
 	if [ -f /usr/bin/dolphin ]; then
 		dolphin_installed=1
 	fi
+kate_installed=0
+	if [ -f /usr/bin/kate ]; then
+		kate_installed=1
+	fi
 	{
 		root apt-get update
 	} || {
@@ -157,6 +161,11 @@ function main ()
 	if [ ! -f /usr/bin/dolphin ]; then
 		if [ $dolphin_installed == 1 ]; then
 			root apt-get install -o Dpkg::Options::="--force-confold" --assume-yes -y dolphin
+		fi
+	fi
+if [ ! -f /usr/bin/kate ]; then
+		if [ $kate_installed == 1 ]; then
+			root apt-get install -o Dpkg::Options::="--force-confold" --assume-yes -y kate
 		fi
 	fi
 	echo -e "\n\n\nMAIN UPGRADE COMPLETE\n\n\n"
