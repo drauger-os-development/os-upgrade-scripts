@@ -105,7 +105,11 @@ function main ()
 	if $(echo $file_contents | grep -vq 'polkitd'); then
 		root groupadd polkitd
 	fi
-	DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install apt drauger-sources
+	{
+		DEBIAN_FRONTEND="noninteractive" root apt-get -o Dpkg::Options::="--force-confold" --force-yes -y install apt drauger-sources
+	} || {
+		DEBIAN_FRONTEND="noninteractive" root dpkg --configure -a --force-confold
+	}
 	# New sources format
 	if [ -f /etc/apt/sources.list ]; then
 		if [ -f /etc/apt/sources.list.save ]; then
